@@ -1,12 +1,12 @@
 
 import React, { useState, useCallback, useRef } from 'react';
-import { PhotoIcon } from './icons/PhotoIcon';
+import { ShirtIcon } from './icons/ShirtIcon';
 
-interface ImageUploaderProps {
+interface ClothingUploaderProps {
   onImageChange: (file: File) => void;
 }
 
-const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
+const ClothingUploader: React.FC<ClothingUploaderProps> = ({ onImageChange }) => {
   const [preview, setPreview] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -57,9 +57,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">1.a. Carregue Sua Foto</h2>
+      <h2 className="text-xl font-semibold text-gray-800 mb-4">1.b. Carregue a Peça de Roupa <span className="text-gray-500 font-normal">(Opcional)</span></h2>
       <div
-        className={`relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-300 ${isDragging ? 'border-blue-500 bg-blue-50' : 'border-gray-300 hover:border-blue-400'}`}
+        className={`relative border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-300 ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-gray-300 hover:border-indigo-400'}`}
         onDrop={handleDrop}
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
@@ -74,11 +74,11 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
           ref={fileInputRef}
         />
         {preview ? (
-          <img src={preview} alt="Pré-visualização" className="mx-auto max-h-48 rounded-md" />
+          <img src={preview} alt="Pré-visualização da roupa" className="mx-auto max-h-48 rounded-md object-contain" />
         ) : (
           <div className="flex flex-col items-center justify-center space-y-2 text-gray-500">
-            <PhotoIcon className="w-12 h-12" />
-            <p className="font-medium">Arraste e solte uma imagem aqui</p>
+            <ShirtIcon className="w-12 h-12" />
+            <p className="font-medium">Arraste a imagem de uma roupa</p>
             <p className="text-sm">ou clique para selecionar</p>
           </div>
         )}
@@ -87,4 +87,4 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ onImageChange }) => {
   );
 };
 
-export default ImageUploader;
+export default ClothingUploader;

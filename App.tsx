@@ -6,9 +6,11 @@ import PromptInput from './components/PromptInput';
 import ImageDisplay from './components/ImageDisplay';
 import { editImageWithPrompt } from './services/geminiService';
 import { fileToBase64 } from './utils/fileUtils';
+import ClothingUploader from './components/ClothingUploader';
 
 const App: React.FC = () => {
   const [originalImageFile, setOriginalImageFile] = useState<File | null>(null);
+  const [clothingImageFile, setClothingImageFile] = useState<File | null>(null);
   const [originalImagePreview, setOriginalImagePreview] = useState<string | null>(null);
   const [editedImage, setEditedImage] = useState<string | null>(null);
   const [prompt, setPrompt] = useState<string>('');
@@ -22,11 +24,24 @@ const App: React.FC = () => {
     setError(null);
   }, []);
 
+  const handleClothingImageChange = useCallback((file: File) => {
+    setClothingImageFile(file);
+    // Auto-populate prompt for a better user experience
+    setPrompt("Coloque esta peça de roupa na pessoa da imagem original, ajustando o caimento e o estilo.");
+    setEditedImage(null);
+    setError(null);
+  }, []);
+
   const handleSubmit = async () => {
-    if (!originalImageFile || !prompt) {
-      setError("Por favor, carregue uma imagem e insira um comando de edição.");
+    if (!originalImageFile) {
+      setError("Por favor, carregue uma imagem sua para começar.");
       return;
     }
+     if (!prompt) {
+      setError("Por favor, insira um comando ou carregue uma peça de roupa para gerar uma sugestão de comando.");
+      return;
+    }
+
 
     setIsLoading(true);
     setEditedImage(null);
@@ -37,7 +52,22 @@ const App: React.FC = () => {
       const pureBase64 = base64DataUrl.split(',')[1];
       const mimeType = originalImageFile.type;
 
-      const resultBase64 = await editImageWithPrompt(pureBase64, mimeType, prompt);
+      let clothingBase64: string | undefined;
+      let clothingMimeType: string | undefined;
+
+      if (clothingImageFile) {
+        const clothingBase64Url = await fileToBase64(clothingImageFile);
+        clothingBase64 = clothingBase64Url.split(',')[1];
+        clothingMimeType = clothingImageFile.type;
+      }
+
+      const resultBase64 = await editImageWithPrompt(
+        pureBase64, 
+        mimeType, 
+        prompt,
+        clothingBase64,
+        clothingMimeType
+      );
       
       setEditedImage(`data:image/png;base64,${resultBase64}`);
     } catch (e) {
@@ -57,14 +87,17 @@ const App: React.FC = () => {
           <div className="text-center mb-10">
             <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900">Provador Virtual com IA</h1>
             <p className="mt-4 text-lg text-gray-600 max-w-3xl mx-auto">
-              Carregue uma foto, descreva a alteração que deseja e veja a mágica acontecer. Transforme seus looks com o poder da IA!
+              Carregue uma foto sua e uma peça de roupa, ou descreva a alteração que deseja, e veja a mágica acontecer!
             </p>
           </div>
           
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12">
             {/* Left Column: Controls */}
             <div className="flex flex-col space-y-8">
-              <ImageUploader onImageChange={handleImageChange} />
+              <div className="flex flex-col space-y-4">
+                <ImageUploader onImageChange={handleImageChange} />
+                <ClothingUploader onImageChange={handleClothingImageChange} />
+              </div>
               <PromptInput
                 prompt={prompt}
                 setPrompt={setPrompt}
